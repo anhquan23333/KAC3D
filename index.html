@@ -311,18 +311,7 @@
             const spacing3D = parseFloat(inputSpace.value) * 0.08; 
             
             textGroup = new THREE.Group();
-           const stlMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x87CEFA,
-                roughness: 0.5, 
-                metalness: 0.1 
-            });
-            const stlMesh = new THREE.Mesh(geometry, stlMaterial);
-            
-            // THÊM DÒNG NÀY VÀO ĐỂ SCALE (X, Y, Z)
-            stlMesh.scale.set(1.5, 1.5, 1.5); // Ví dụ: 1.5 là phóng to 1.5 lần. 0.5 là thu nhỏ một nửa.
-            
-            scene.add(stlMesh);
-        }, undefined, function (error) {
+            const textMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.7, roughness: 0.2 });
             
             let currentX = 0; const size = 8;
             for (let i = 0; i < textStr.length; i++) {
