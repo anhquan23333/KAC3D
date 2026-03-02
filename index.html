@@ -109,16 +109,16 @@
     </div>
 
     <div id="canvas-container"></div>
-    <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể.</div>
+    <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể (Quay quanh trục).</div>
 
     <div class="input-group">
-        <label>Độ dày chữ (Extrude): <span id="valZ">0.15</span> mm</label>
-        <input type="range" id="thicknessInput" min="0.05" max="2" value="0.15" step="0.05">
+        <label>Độ dày chữ (Extrude): <span id="valZ">0.13</span> mm</label>
+        <input type="range" id="thicknessInput" min="0.05" max="1.5" value="0.13" step="0.01">
     </div>
 
     <div class="input-group">
         <label>Khoảng cách giữa các chữ: <span id="valSpace">0</span> px</label>
-        <input type="range" id="spacingInput" min="-10" max="30" value="0">
+        <input type="range" id="spacingInput" min="-10" max="30" value="0" step="1">
     </div>
 
     <div class="slider-row" style="margin-top: 15px;">
@@ -141,4 +141,221 @@
 </div>
 
 <script>
-    const submitBtn = document
+    const submitBtn = document.getElementById('submitBtn');
+    const schoolRadios = document.getElementsByName('school');
+    const schoolOtherText = document.getElementById('schoolOtherText');
+    const quantityRadios = document.getElementsByName('quantity');
+    const paymentBox = document.getElementById('paymentBox');
+    const uploadBox = document.getElementById('uploadBox');
+    const paymentText = document.getElementById('paymentText');
+    const paymentQR = document.getElementById('paymentQR');
+    
+    let opentypeFont = null;
+
+    opentype.load('https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Bold.ttf', function(err, font) {
+        if (!err) {
+            opentypeFont = font;
+            submitBtn.textContent = "Gửi Đơn Hàng & Thiết Kế";
+            submitBtn.disabled = false;
+        }
+    });
+
+    schoolRadios.forEach(r => r.addEventListener('change', () => {
+        schoolOtherText.style.display = document.getElementById('schoolOtherRadio').checked ? 'block' : 'none';
+    }));
+
+    const qrData = {
+        "1": { text: "Vui lòng thanh toán 62.000 vào mã QR dưới đây", qr: "LINK_QR_1" },
+        "2": { text: "Vui lòng thanh toán 120.000 vào mã QR dưới đây", qr: "LINK_QR_2" },
+        "3": { text: "Vui lòng thanh toán 180.000 vào mã QR dưới đây", qr: "LINK_QR_3" }
+    };
+    quantityRadios.forEach(r => r.addEventListener('change', (e) => {
+        paymentText.textContent = qrData[e.target.value].text;
+        paymentQR.src = qrData[e.target.value].qr;
+        paymentBox.style.display = 'block'; uploadBox.style.display = 'block';
+    }));
+
+    submitBtn.addEventListener('click', () => {
+        const nameVal = document.getElementById('fullName').value.trim();
+        const keyText = document.getElementById('keychainName').value.trim();
+        if (!nameVal || !keyText) { alert('Vui lòng điền Họ Tên và Tên in Keychain!'); return; }
+        if (!document.getElementById('paymentProof').files[0]) { alert("Vui lòng tải lên ảnh bill chuyển khoản!"); return; }
+
+        submitBtn.textContent = "Đang xử lý..."; submitBtn.disabled = true;
+
+        const spacing = parseFloat(document.getElementById('spacingInput').value);
+        let path = new opentype.Path();
+        let x = 0; const y = 100;
+        for (let i = 0; i < keyText.length; i++) {
+            const charPath = opentypeFont.getPath(keyText[i], x, y, 100);
+            path.extend(charPath);
+            x += opentypeFont.getAdvanceWidth(keyText[i], 100) + spacing;
+        }
+        const bb = path.getBoundingBox();
+        const svgContent = `<?xml version="1.0" encoding="utf-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${bb.x2-bb.x1+20}" height="${bb.y2-bb.y1+20}" viewBox="${bb.x1-10} ${bb.y1-10} ${bb.x2-bb.x1+20} ${bb.y2-bb.y1+20}"><path d="${path.toPathData()}" fill="black" /></svg>`;
+        const svgFile = new File([new Blob([svgContent], { type: 'image/svg+xml' })], `Vector_${keyText}.svg`, { type: 'image/svg+xml' });
+
+        const formData = new FormData();
+        formData.append("Họ_Tên", nameVal);
+        let schoolVal = ""; schoolRadios.forEach(r => { if(r.checked) schoolVal = r.value==="Khác" ? schoolOtherText.value : r.value; });
+        formData.append("Trường", schoolVal);
+        formData.append("Lớp", document.getElementById('className').value);
+        formData.append("SĐT", document.getElementById('phone').value);
+        formData.append("Facebook", document.getElementById('facebook').value);
+        let qtyVal = ""; quantityRadios.forEach(r => { if(r.checked) qtyVal = r.value; });
+        formData.append("Số_lượng", qtyVal);
+        formData.append("Tên_Custom", keyText);
+        formData.append("Tọa_độ_X", document.getElementById('posXInput').value);
+        formData.append("Tọa_độ_Y", document.getElementById('posYInput').value);
+        formData.append("Độ_dày_chữ", document.getElementById('thicknessInput').value + "mm");
+        formData.append("Khoảng_cách_chữ", spacing + "px");
+        formData.append("Bill_Thanh_Toán", document.getElementById('paymentProof').files[0]);
+        formData.append("File_Vector_Cắt", svgFile);
+
+        fetch("https://formsubmit.co/ajax/EMAIL_CUA_BAN@gmail.com", { method: "POST", body: formData })
+        .then(() => {
+            document.getElementById('formScreen').style.display = 'none';
+            document.getElementById('thankYouMsg').textContent = `Chúng mình xin cảm ơn sự ủng hộ từ ${nameVal}!`;
+            document.getElementById('successScreen').style.display = 'block';
+        }).catch(() => {
+            alert("Có lỗi xảy ra, vui lòng thử lại!");
+            submitBtn.textContent = "Gửi Đơn Hàng & Thiết Kế"; submitBtn.disabled = false;
+        });
+    });
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+    import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
+    const container = document.getElementById('canvas-container');
+    const inputName = document.getElementById('keychainName');
+    const inputThickness = document.getElementById('thicknessInput');
+    const inputSpacing = document.getElementById('spacingInput');
+    const inputX = document.getElementById('posXInput');
+    const inputY = document.getElementById('posYInput');
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(0, -40, 60);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(20, 20, 50);
+    scene.add(dirLight);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    const baseGeo = new THREE.BoxGeometry(60, 20, 4);
+    const baseMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
+    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+    scene.add(baseMesh);
+
+    let textGroup = null; // Chuyển thành Group để chứa từng chữ cái riêng biệt
+    let currentFont = null;
+
+    new FontLoader().load('https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json', function (font) {
+        currentFont = font;
+    });
+
+    function updateText3D() {
+        if (!currentFont) return;
+        const textStr = inputName.value.toUpperCase() || ' ';
+        
+        // Dọn dẹp RAM sạc khối Group cũ
+        if (textGroup) {
+            scene.remove(textGroup);
+            textGroup.children.forEach(child => {
+                child.geometry.dispose();
+                child.material.dispose();
+            });
+        }
+
+        const thickness = parseFloat(inputThickness.value);
+        // Quy đổi tỷ lệ khoảng cách từ 2D SVG sang tỷ lệ bản vẽ 3D
+        const spacing3D = parseFloat(inputSpacing.value) * 0.08; 
+        
+        textGroup = new THREE.Group();
+        const textMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.7, roughness: 0.2 });
+        
+        let currentX = 0;
+        const size = 8;
+
+        // Vòng lặp tách từng chữ cái để chèn khoảng cách (Tracking)
+        for (let i = 0; i < textStr.length; i++) {
+            const char = textStr[i];
+            
+            // Xử lý phím cách
+            if (char === ' ') {
+                currentX += size * 0.4 + spacing3D;
+                continue;
+            }
+
+            // Ép vát góc cực nhỏ để tương thích với độ dày mỏng 1/15
+            const charGeo = new TextGeometry(char, {
+                font: currentFont, size: size, depth: thickness, curveSegments: 4,
+                bevelEnabled: true, bevelThickness: 0.005, bevelSize: 0.005, bevelSegments: 1
+            });
+
+            charGeo.computeBoundingBox();
+            const charWidth = charGeo.boundingBox.max.x - charGeo.boundingBox.min.x;
+            
+            const charMesh = new THREE.Mesh(charGeo, textMat);
+            charMesh.position.x = currentX;
+            textGroup.add(charMesh);
+            
+            currentX += charWidth + spacing3D;
+        }
+
+        // Tự động tìm lại tâm của cụm chữ sau khi đã giãn cách
+        const totalWidth = currentX - spacing3D; 
+        const centerOffset = -0.5 * totalWidth;
+        
+        const posX = parseFloat(inputX.value);
+        const posY = parseFloat(inputY.value);
+        
+        textGroup.position.set(centerOffset + posX, posY, 2); 
+        scene.add(textGroup);
+    }
+
+    // Lắng nghe tất cả các thay đổi để cập nhật 3D theo thời gian thực
+    inputName.addEventListener('input', updateText3D);
+    
+    inputThickness.addEventListener('input', () => {
+        document.getElementById('valZ').textContent = inputThickness.value;
+        updateText3D();
+    });
+
+    inputSpacing.addEventListener('input', () => {
+        document.getElementById('valSpace').textContent = inputSpacing.value;
+        updateText3D();
+    });
+
+    inputX.addEventListener('input', () => {
+        document.getElementById('valX').textContent = inputX.value;
+        updateText3D(); // Gọi nguyên cụm để tâm chữ không bị lệch
+    });
+
+    inputY.addEventListener('input', () => {
+        document.getElementById('valY').textContent = inputY.value;
+        if(textGroup) textGroup.position.y = parseFloat(inputY.value);
+    });
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    animate();
+</script>
+
+</body>
+</html>
