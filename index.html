@@ -17,7 +17,6 @@
     </script>
 
     <style>
-        /* GIAO DIỆN LIQUID GLASS */
         body { font-family: 'Montserrat', sans-serif; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'); background-size: cover; background-position: center; background-attachment: fixed; animation: backgroundZoom 20s infinite alternate ease-in-out; overflow: hidden; }
         @keyframes backgroundZoom { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
         .blob { position: absolute; filter: blur(40px); z-index: -1; opacity: 0.8; animation: float 10s infinite ease-in-out alternate; }
@@ -112,8 +111,8 @@
     <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể (Quay quanh trục).</div>
 
     <div class="input-group">
-        <label>Độ dày chữ (Extrude): <span id="valZ">0.13</span> mm</label>
-        <input type="range" id="thicknessInput" min="0.05" max="1.5" value="0.13" step="0.01">
+        <label>Độ dày chữ (Extrude): <span id="valZ">0.2</span> mm</label>
+        <input type="range" id="thicknessInput" min="0.1" max="3.0" value="0.2" step="0.1">
     </div>
 
     <div class="input-group">
@@ -254,12 +253,13 @@
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
+    // Tọa độ hộp nền: Dày 4, tâm ở Z=0 => Bề mặt trên cùng nằm ở Z=2
     const baseGeo = new THREE.BoxGeometry(60, 20, 4);
     const baseMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
     const baseMesh = new THREE.Mesh(baseGeo, baseMat);
     scene.add(baseMesh);
 
-    let textGroup = null; // Chuyển thành Group để chứa từng chữ cái riêng biệt
+    let textGroup = null; 
     let currentFont = null;
 
     new FontLoader().load('https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json', function (font) {
@@ -270,7 +270,6 @@
         if (!currentFont) return;
         const textStr = inputName.value.toUpperCase() || ' ';
         
-        // Dọn dẹp RAM sạc khối Group cũ
         if (textGroup) {
             scene.remove(textGroup);
             textGroup.children.forEach(child => {
@@ -280,7 +279,6 @@
         }
 
         const thickness = parseFloat(inputThickness.value);
-        // Quy đổi tỷ lệ khoảng cách từ 2D SVG sang tỷ lệ bản vẽ 3D
         const spacing3D = parseFloat(inputSpacing.value) * 0.08; 
         
         textGroup = new THREE.Group();
@@ -289,20 +287,21 @@
         let currentX = 0;
         const size = 8;
 
-        // Vòng lặp tách từng chữ cái để chèn khoảng cách (Tracking)
         for (let i = 0; i < textStr.length; i++) {
             const char = textStr[i];
             
-            // Xử lý phím cách
             if (char === ' ') {
                 currentX += size * 0.4 + spacing3D;
                 continue;
             }
 
-            // Ép vát góc cực nhỏ để tương thích với độ dày mỏng 1/15
+            // SỬA LỖI EXTRUDE: Dùng tham số "height" thay vì "depth", và tắt bevel (vát góc) để lưng chữ phẳng 100%
             const charGeo = new TextGeometry(char, {
-                font: currentFont, size: size, depth: thickness, curveSegments: 4,
-                bevelEnabled: true, bevelThickness: 0.005, bevelSize: 0.005, bevelSegments: 1
+                font: currentFont, 
+                size: size, 
+                height: thickness, 
+                curveSegments: 4,
+                bevelEnabled: false 
             });
 
             charGeo.computeBoundingBox();
@@ -315,18 +314,18 @@
             currentX += charWidth + spacing3D;
         }
 
-        // Tự động tìm lại tâm của cụm chữ sau khi đã giãn cách
         const totalWidth = currentX - spacing3D; 
         const centerOffset = -0.5 * totalWidth;
         
         const posX = parseFloat(inputX.value);
         const posY = parseFloat(inputY.value);
         
+        // Origin Z được khóa chết ở số 2 (khớp tuyệt đối với bề mặt hộp nền)
+        // Khi Extrude tăng, nó chỉ nở ra phía trước, phần lưng hoàn toàn không bị lơ lửng
         textGroup.position.set(centerOffset + posX, posY, 2); 
         scene.add(textGroup);
     }
 
-    // Lắng nghe tất cả các thay đổi để cập nhật 3D theo thời gian thực
     inputName.addEventListener('input', updateText3D);
     
     inputThickness.addEventListener('input', () => {
@@ -341,7 +340,7 @@
 
     inputX.addEventListener('input', () => {
         document.getElementById('valX').textContent = inputX.value;
-        updateText3D(); // Gọi nguyên cụm để tâm chữ không bị lệch
+        updateText3D();
     });
 
     inputY.addEventListener('input', () => {
