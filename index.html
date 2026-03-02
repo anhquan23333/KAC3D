@@ -109,14 +109,19 @@
     </div>
 
     <div id="canvas-container"></div>
-    <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể (Quay quanh trục).</div>
+    <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể.</div>
 
     <div class="input-group">
-        <label>Độ dày chữ (Extrude): <span id="valZ">2</span> mm</label>
-        <input type="range" id="thicknessInput" min="1" max="15" value="2" step="0.5">
+        <label>Độ dày chữ (Extrude): <span id="valZ">0.15</span> mm</label>
+        <input type="range" id="thicknessInput" min="0.05" max="2" value="0.15" step="0.05">
     </div>
 
-    <div class="slider-row">
+    <div class="input-group">
+        <label>Khoảng cách giữa các chữ: <span id="valSpace">0</span> px</label>
+        <input type="range" id="spacingInput" min="-10" max="30" value="0">
+    </div>
+
+    <div class="slider-row" style="margin-top: 15px;">
         <div class="slider-col">
             <label>Trục X (Ngang): <span id="valX">0</span></label>
             <input type="range" id="posXInput" min="-30" max="30" value="0" step="0.5">
@@ -125,11 +130,6 @@
             <label>Trục Y (Dọc): <span id="valY">-3</span></label>
             <input type="range" id="posYInput" min="-20" max="20" value="-3" step="0.5">
         </div>
-    </div>
-    
-    <div class="input-group" style="margin-top: 15px;">
-        <label>Khoảng cách giữa các chữ (Vector cắt 2D): <span id="valSpace">0</span> px</label>
-        <input type="range" id="spacingInput" min="-10" max="30" value="0">
     </div>
 
     <button id="submitBtn" disabled>Đang tải dữ liệu...</button>
@@ -141,202 +141,4 @@
 </div>
 
 <script>
-    const submitBtn = document.getElementById('submitBtn');
-    const schoolRadios = document.getElementsByName('school');
-    const schoolOtherText = document.getElementById('schoolOtherText');
-    const quantityRadios = document.getElementsByName('quantity');
-    const paymentBox = document.getElementById('paymentBox');
-    const uploadBox = document.getElementById('uploadBox');
-    const paymentText = document.getElementById('paymentText');
-    const paymentQR = document.getElementById('paymentQR');
-    
-    let opentypeFont = null;
-
-    // Tải font 2D để bẻ path SVG
-    opentype.load('https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Bold.ttf', function(err, font) {
-        if (!err) {
-            opentypeFont = font;
-            submitBtn.textContent = "Gửi Đơn Hàng & Thiết Kế";
-            submitBtn.disabled = false;
-        }
-    });
-
-    // Hiện ô nhập trường "Khác"
-    schoolRadios.forEach(r => r.addEventListener('change', () => {
-        schoolOtherText.style.display = document.getElementById('schoolOtherRadio').checked ? 'block' : 'none';
-    }));
-
-    // Logic QR Code
-    const qrData = {
-        "1": { text: "Vui lòng thanh toán 62.000 vào mã QR dưới đây", qr: "LINK_QR_1" },
-        "2": { text: "Vui lòng thanh toán 120.000 vào mã QR dưới đây", qr: "LINK_QR_2" },
-        "3": { text: "Vui lòng thanh toán 180.000 vào mã QR dưới đây", qr: "LINK_QR_3" }
-    };
-    quantityRadios.forEach(r => r.addEventListener('change', (e) => {
-        paymentText.textContent = qrData[e.target.value].text;
-        paymentQR.src = qrData[e.target.value].qr;
-        paymentBox.style.display = 'block'; uploadBox.style.display = 'block';
-    }));
-
-    // Cập nhật text số liệu slider 2D
-    document.getElementById('spacingInput').addEventListener('input', (e) => {
-        document.getElementById('valSpace').textContent = e.target.value;
-    });
-
-    // NÚT SUBMIT
-    submitBtn.addEventListener('click', () => {
-        const nameVal = document.getElementById('fullName').value.trim();
-        const keyText = document.getElementById('keychainName').value.trim();
-        if (!nameVal || !keyText) { alert('Vui lòng điền Họ Tên và Tên in Keychain!'); return; }
-        if (!document.getElementById('paymentProof').files[0]) { alert("Vui lòng tải lên ảnh bill chuyển khoản!"); return; }
-
-        submitBtn.textContent = "Đang xử lý..."; submitBtn.disabled = true;
-
-        // Tạo SVG Path
-        const spacing = parseFloat(document.getElementById('spacingInput').value);
-        let path = new opentype.Path();
-        let x = 0; const y = 100;
-        for (let i = 0; i < keyText.length; i++) {
-            const charPath = opentypeFont.getPath(keyText[i], x, y, 100);
-            path.extend(charPath);
-            x += opentypeFont.getAdvanceWidth(keyText[i], 100) + spacing;
-        }
-        const bb = path.getBoundingBox();
-        const svgContent = `<?xml version="1.0" encoding="utf-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${bb.x2-bb.x1+20}" height="${bb.y2-bb.y1+20}" viewBox="${bb.x1-10} ${bb.y1-10} ${bb.x2-bb.x1+20} ${bb.y2-bb.y1+20}"><path d="${path.toPathData()}" fill="black" /></svg>`;
-        const svgFile = new File([new Blob([svgContent], { type: 'image/svg+xml' })], `Vector_${keyText}.svg`, { type: 'image/svg+xml' });
-
-        // Tạo FormData
-        const formData = new FormData();
-        formData.append("Họ_Tên", nameVal);
-        let schoolVal = ""; schoolRadios.forEach(r => { if(r.checked) schoolVal = r.value==="Khác" ? schoolOtherText.value : r.value; });
-        formData.append("Trường", schoolVal);
-        formData.append("Lớp", document.getElementById('className').value);
-        formData.append("SĐT", document.getElementById('phone').value);
-        formData.append("Facebook", document.getElementById('facebook').value);
-        let qtyVal = ""; quantityRadios.forEach(r => { if(r.checked) qtyVal = r.value; });
-        formData.append("Số_lượng", qtyVal);
-        formData.append("Tên_Custom", keyText);
-        formData.append("Tọa_độ_X", document.getElementById('posXInput').value);
-        formData.append("Tọa_độ_Y", document.getElementById('posYInput').value);
-        formData.append("Độ_dày_chữ", document.getElementById('thicknessInput').value + "mm");
-        formData.append("Bill_Thanh_Toán", document.getElementById('paymentProof').files[0]);
-        formData.append("File_Vector_Cắt", svgFile);
-
-        // THAY EMAIL CỦA BẠN VÀO ĐÂY
-        fetch("https://formsubmit.co/ajax/EMAIL_CUA_BAN@gmail.com", { method: "POST", body: formData })
-        .then(() => {
-            document.getElementById('formScreen').style.display = 'none';
-            document.getElementById('thankYouMsg').textContent = `Chúng mình xin cảm ơn sự ủng hộ từ ${nameVal}!`;
-            document.getElementById('successScreen').style.display = 'block';
-        }).catch(() => {
-            alert("Có lỗi xảy ra, vui lòng thử lại!");
-            submitBtn.textContent = "Gửi Đơn Hàng & Thiết Kế"; submitBtn.disabled = false;
-        });
-    });
-</script>
-
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-    import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-
-    const container = document.getElementById('canvas-container');
-    const inputName = document.getElementById('keychainName');
-    const inputThickness = document.getElementById('thicknessInput');
-    const inputX = document.getElementById('posXInput');
-    const inputY = document.getElementById('posYInput');
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, -40, 60); // Đặt góc camera nhìn hơi chéo từ dưới lên
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    container.appendChild(renderer.domElement);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(20, 20, 50);
-    scene.add(dirLight);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-
-    // Vật thể nền (Mô phỏng Cà Vạt)
-    const baseGeo = new THREE.BoxGeometry(60, 20, 4);
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-    scene.add(baseMesh);
-
-    let textMesh = null;
-    let currentFont = null;
-
-    new FontLoader().load('https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json', function (font) {
-        currentFont = font;
-    });
-
-    function updateText3D() {
-        if (!currentFont) return;
-        const textStr = inputName.value.toUpperCase() || ' ';
-        
-        // Xóa mesh cũ để RAM không bị đầy và cập nhật geometry mới
-        if (textMesh) {
-            scene.remove(textMesh);
-            textMesh.geometry.dispose();
-            textMesh.material.dispose();
-        }
-
-        const thickness = parseFloat(inputThickness.value);
-        const textGeo = new TextGeometry(textStr, {
-            font: currentFont, size: 8, depth: thickness, curveSegments: 4,
-            bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.1, bevelSegments: 2
-        });
-
-        textGeo.computeBoundingBox();
-        const centerOffset = -0.5 * (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x);
-        
-        const textMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.7, roughness: 0.2 });
-        textMesh = new THREE.Mesh(textGeo, textMat);
-        
-        // Cập nhật vị trí dựa vào 2 thanh trượt X, Y
-        const posX = parseFloat(inputX.value);
-        const posY = parseFloat(inputY.value);
-        textMesh.position.set(centerOffset + posX, posY, 2); // Z=2 để nằm trên mặt hộp
-        
-        scene.add(textMesh);
-    }
-
-    // Các Event Listeners để cập nhật 3D Real-time
-    inputName.addEventListener('input', updateText3D);
-    
-    inputThickness.addEventListener('input', () => {
-        document.getElementById('valZ').textContent = inputThickness.value;
-        updateText3D(); // Gọi lại hàm để tạo geometry mới với độ dày mới
-    });
-
-    inputX.addEventListener('input', () => {
-        document.getElementById('valX').textContent = inputX.value;
-        if(textMesh) {
-            textMesh.geometry.computeBoundingBox();
-            const centerOffset = -0.5 * (textMesh.geometry.boundingBox.max.x - textMesh.geometry.boundingBox.min.x);
-            textMesh.position.x = centerOffset + parseFloat(inputX.value);
-        }
-    });
-
-    inputY.addEventListener('input', () => {
-        document.getElementById('valY').textContent = inputY.value;
-        if(textMesh) textMesh.position.y = parseFloat(inputY.value);
-    });
-
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-    }
-    animate();
-</script>
-
-</body>
-</html>
+    const submitBtn = document
