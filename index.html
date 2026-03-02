@@ -44,10 +44,11 @@
         .payment-box p { font-size: 14px; color: #d32f2f; font-weight: bold; margin: 5px 0;}
         .payment-note { font-size: 13px; color: #222; font-weight: bold; }
 
-        .config-block { background: rgba(255,255,255,0.3); padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px dashed rgba(255,255,255,0.6); display: none; }
-        .config-block h4 { margin: 0 0 15px 0; color: #333; font-size: 15px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px;}
-        
-        .canvas-container { width: 100%; height: 250px; background: rgba(0,0,0,0.15); border-radius: 15px; border: 1px solid rgba(255,255,255,0.5); overflow: hidden; position: relative; margin-bottom: 10px; cursor: grab;}
+        .keychain-section { background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.6); border-radius: 15px; padding: 15px; margin-bottom: 20px; display: none; }
+        .keychain-section.active { display: block; }
+        .section-title { font-size: 15px; color: #fff; background: #333; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px; margin-top: 0;}
+
+        .canvas-container { width: 100%; height: 250px; background: rgba(0,0,0,0.15); border-radius: 10px; border: 1px solid rgba(255,255,255,0.5); overflow: hidden; position: relative; margin-bottom: 10px; cursor: grab;}
         .canvas-container:active { cursor: grabbing; }
         .instruction { font-size: 11px; color: #444; text-align: center; margin-bottom: 15px; font-style: italic; }
 
@@ -88,93 +89,91 @@
     <h3>2. Thanh Toán</h3>
     <div class="input-group radio-group">
         <label style="font-weight: bold;">Số lượng keychain cần đặt:</label>
-        <label><input type="radio" name="quantity" value="1"> 1 Keychain</label>
+        <label><input type="radio" name="quantity" value="1" checked> 1 Keychain</label>
         <label><input type="radio" name="quantity" value="2"> 2 Keychain</label>
         <label><input type="radio" name="quantity" value="3"> 3 Keychain</label>
     </div>
 
-    <div class="payment-box" id="paymentBox">
-        <p id="paymentText">Vui lòng thanh toán ... vào mã QR dưới đây</p>
-        <img id="paymentQR" src="" alt="QR Chuyển Khoản">
+    <div class="payment-box" id="paymentBox" style="display: block;">
+        <p id="paymentText">Vui lòng thanh toán 62.000 vào mã QR dưới đây</p>
+        <img id="paymentQR" src="LINK_QR_1" alt="QR Chuyển Khoản">
         <div class="payment-note">Nội dung: Họ và tên + SĐT</div>
     </div>
 
-    <div class="input-group" id="uploadBox" style="display:none;">
+    <div class="input-group" id="uploadBox">
         <label>Tải lên ảnh màn hình thanh toán (JPG, PNG, PDF):</label>
         <input type="file" id="paymentProof" accept=".jpg, .jpeg, .png, .pdf">
     </div>
 
-    <h3 id="designTitle" style="display:none;">3. Thiết Kế Tên & Xem Trước 3D</h3>
+    <h3>3. Thiết Kế 3D Từng Món</h3>
     
-    <div id="configsWrapper">
-        <div class="config-block" id="configBlock_1">
-            <h4>✨ Thiết Kế Keychain #1</h4>
-            <div class="input-group">
-                <label>Tên in (Tối đa 10 chữ):</label>
-                <input type="text" id="keychainName_1" placeholder="VD: ANH QUAN" autocomplete="off">
-            </div>
-            <div id="canvas-container_1" class="canvas-container"></div>
-            <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể (Quay quanh trục).</div>
-            <div class="input-group">
-                <label>Độ dày chữ (Extrude): <span id="valZ_1">0.2</span> mm</label>
-                <input type="range" id="thicknessInput_1" min="0.1" max="3.0" value="0.2" step="0.1">
-            </div>
-            <div class="input-group">
-                <label>Khoảng cách chữ: <span id="valSpace_1">0</span> px</label>
-                <input type="range" id="spacingInput_1" min="-10" max="30" value="0" step="1">
-            </div>
-            <div class="slider-row" style="margin-top: 15px;">
-                <div class="slider-col"><label>Trục X: <span id="valX_1">0</span></label><input type="range" id="posXInput_1" min="-30" max="30" value="0" step="0.5"></div>
-                <div class="slider-col"><label>Trục Y: <span id="valY_1">-3</span></label><input type="range" id="posYInput_1" min="-20" max="20" value="-3" step="0.5"></div>
-            </div>
+    <div class="keychain-section active" id="kcSection1">
+        <h4 class="section-title">🔑 Keychain #1</h4>
+        <div class="input-group">
+            <label>Tên in (Tối đa 10 chữ):</label>
+            <input type="text" id="kcName1" placeholder="VD: ANH QUAN" autocomplete="off">
         </div>
-
-        <div class="config-block" id="configBlock_2">
-            <h4>✨ Thiết Kế Keychain #2</h4>
-            <div class="input-group">
-                <label>Tên in (Tối đa 10 chữ):</label>
-                <input type="text" id="keychainName_2" placeholder="VD: HONG NHUNG" autocomplete="off">
-            </div>
-            <div id="canvas-container_2" class="canvas-container"></div>
-            <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể (Quay quanh trục).</div>
-            <div class="input-group">
-                <label>Độ dày chữ (Extrude): <span id="valZ_2">0.2</span> mm</label>
-                <input type="range" id="thicknessInput_2" min="0.1" max="3.0" value="0.2" step="0.1">
-            </div>
-            <div class="input-group">
-                <label>Khoảng cách chữ: <span id="valSpace_2">0</span> px</label>
-                <input type="range" id="spacingInput_2" min="-10" max="30" value="0" step="1">
-            </div>
-            <div class="slider-row" style="margin-top: 15px;">
-                <div class="slider-col"><label>Trục X: <span id="valX_2">0</span></label><input type="range" id="posXInput_2" min="-30" max="30" value="0" step="0.5"></div>
-                <div class="slider-col"><label>Trục Y: <span id="valY_2">-3</span></label><input type="range" id="posYInput_2" min="-20" max="20" value="-3" step="0.5"></div>
-            </div>
+        <div class="canvas-container" id="kcCanvas1"></div>
+        <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể.</div>
+        <div class="input-group">
+            <label>Độ dày chữ (Extrude): <span id="valZ1">0.2</span> mm</label>
+            <input type="range" id="kcZ1" min="0.1" max="3.0" value="0.2" step="0.1">
         </div>
-
-        <div class="config-block" id="configBlock_3">
-            <h4>✨ Thiết Kế Keychain #3</h4>
-            <div class="input-group">
-                <label>Tên in (Tối đa 10 chữ):</label>
-                <input type="text" id="keychainName_3" placeholder="VD: MINH TRI" autocomplete="off">
-            </div>
-            <div id="canvas-container_3" class="canvas-container"></div>
-            <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể (Quay quanh trục).</div>
-            <div class="input-group">
-                <label>Độ dày chữ (Extrude): <span id="valZ_3">0.2</span> mm</label>
-                <input type="range" id="thicknessInput_3" min="0.1" max="3.0" value="0.2" step="0.1">
-            </div>
-            <div class="input-group">
-                <label>Khoảng cách chữ: <span id="valSpace_3">0</span> px</label>
-                <input type="range" id="spacingInput_3" min="-10" max="30" value="0" step="1">
-            </div>
-            <div class="slider-row" style="margin-top: 15px;">
-                <div class="slider-col"><label>Trục X: <span id="valX_3">0</span></label><input type="range" id="posXInput_3" min="-30" max="30" value="0" step="0.5"></div>
-                <div class="slider-col"><label>Trục Y: <span id="valY_3">-3</span></label><input type="range" id="posYInput_3" min="-20" max="20" value="-3" step="0.5"></div>
-            </div>
+        <div class="input-group">
+            <label>Khoảng cách chữ: <span id="valSpace1">0</span> px</label>
+            <input type="range" id="kcSpace1" min="-10" max="30" value="0" step="1">
+        </div>
+        <div class="slider-row">
+            <div class="slider-col"><label>Trục X: <span id="valX1">0</span></label><input type="range" id="kcX1" min="-30" max="30" value="0" step="0.5"></div>
+            <div class="slider-col"><label>Trục Y: <span id="valY1">-3</span></label><input type="range" id="kcY1" min="-20" max="20" value="-3" step="0.5"></div>
         </div>
     </div>
 
-    <button id="submitBtn" disabled style="display:none;">Đang tải dữ liệu...</button>
+    <div class="keychain-section" id="kcSection2">
+        <h4 class="section-title">🔑 Keychain #2</h4>
+        <div class="input-group">
+            <label>Tên in (Tối đa 10 chữ):</label>
+            <input type="text" id="kcName2" placeholder="VD: MINH ANH" autocomplete="off">
+        </div>
+        <div class="canvas-container" id="kcCanvas2"></div>
+        <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể.</div>
+        <div class="input-group">
+            <label>Độ dày chữ (Extrude): <span id="valZ2">0.2</span> mm</label>
+            <input type="range" id="kcZ2" min="0.1" max="3.0" value="0.2" step="0.1">
+        </div>
+        <div class="input-group">
+            <label>Khoảng cách chữ: <span id="valSpace2">0</span> px</label>
+            <input type="range" id="kcSpace2" min="-10" max="30" value="0" step="1">
+        </div>
+        <div class="slider-row">
+            <div class="slider-col"><label>Trục X: <span id="valX2">0</span></label><input type="range" id="kcX2" min="-30" max="30" value="0" step="0.5"></div>
+            <div class="slider-col"><label>Trục Y: <span id="valY2">-3</span></label><input type="range" id="kcY2" min="-20" max="20" value="-3" step="0.5"></div>
+        </div>
+    </div>
+
+    <div class="keychain-section" id="kcSection3">
+        <h4 class="section-title">🔑 Keychain #3</h4>
+        <div class="input-group">
+            <label>Tên in (Tối đa 10 chữ):</label>
+            <input type="text" id="kcName3" placeholder="VD: BAO LONG" autocomplete="off">
+        </div>
+        <div class="canvas-container" id="kcCanvas3"></div>
+        <div class="instruction">💡 Dùng ngón tay xoay vùng xám để xem tổng thể.</div>
+        <div class="input-group">
+            <label>Độ dày chữ (Extrude): <span id="valZ3">0.2</span> mm</label>
+            <input type="range" id="kcZ3" min="0.1" max="3.0" value="0.2" step="0.1">
+        </div>
+        <div class="input-group">
+            <label>Khoảng cách chữ: <span id="valSpace3">0</span> px</label>
+            <input type="range" id="kcSpace3" min="-10" max="30" value="0" step="1">
+        </div>
+        <div class="slider-row">
+            <div class="slider-col"><label>Trục X: <span id="valX3">0</span></label><input type="range" id="kcX3" min="-30" max="30" value="0" step="0.5"></div>
+            <div class="slider-col"><label>Trục Y: <span id="valY3">-3</span></label><input type="range" id="kcY3" min="-20" max="20" value="-3" step="0.5"></div>
+        </div>
+    </div>
+
+    <button id="submitBtn" disabled>Đang tải Hệ Thống Đồ Họa...</button>
 </div>
 
 <div class="card" id="successScreen">
@@ -182,140 +181,78 @@
     <p id="thankYouMsg">Chúng mình xin cảm ơn sự ủng hộ từ bạn!</p>
 </div>
 
-<script>
-    const submitBtn = document.getElementById('submitBtn');
-    const schoolRadios = document.getElementsByName('school');
-    const schoolOtherText = document.getElementById('schoolOtherText');
-    const quantityRadios = document.getElementsByName('quantity');
-    const paymentBox = document.getElementById('paymentBox');
-    const uploadBox = document.getElementById('uploadBox');
-    const paymentText = document.getElementById('paymentText');
-    const paymentQR = document.getElementById('paymentQR');
-    const designTitle = document.getElementById('designTitle');
-    
-    let opentypeFont = null;
-    let selectedQty = 0;
-
-    opentype.load('https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Bold.ttf', function(err, font) {
-        if (!err) {
-            opentypeFont = font;
-            submitBtn.textContent = "Gửi Đơn Hàng & Thiết Kế";
-            submitBtn.disabled = false;
-        }
-    });
-
-    schoolRadios.forEach(r => r.addEventListener('change', () => {
-        schoolOtherText.style.display = document.getElementById('schoolOtherRadio').checked ? 'block' : 'none';
-    }));
-
-    const qrData = {
-        "1": { text: "Vui lòng thanh toán 62.000 vào mã QR dưới đây", qr: "LINK_QR_1" },
-        "2": { text: "Vui lòng thanh toán 120.000 vào mã QR dưới đây", qr: "LINK_QR_2" },
-        "3": { text: "Vui lòng thanh toán 180.000 vào mã QR dưới đây", qr: "LINK_QR_3" }
-    };
-
-    // Logic Ẩn/Hiện số lượng Keychain config
-    quantityRadios.forEach(r => r.addEventListener('change', (e) => {
-        selectedQty = parseInt(e.target.value);
-        paymentText.textContent = qrData[selectedQty].text;
-        paymentQR.src = qrData[selectedQty].qr;
-        paymentBox.style.display = 'block'; uploadBox.style.display = 'block';
-        
-        designTitle.style.display = 'block';
-        submitBtn.style.display = 'block';
-
-        // Tự động Bật/Tắt các khối cấu hình 3D
-        for(let i=1; i<=3; i++) {
-            document.getElementById(`configBlock_${i}`).style.display = (i <= selectedQty) ? 'block' : 'none';
-        }
-    }));
-
-    submitBtn.addEventListener('click', () => {
-        const nameVal = document.getElementById('fullName').value.trim();
-        if (!nameVal) { alert('Vui lòng điền Họ Tên!'); return; }
-        if (!document.getElementById('paymentProof').files[0]) { alert("Vui lòng tải lên ảnh bill chuyển khoản!"); return; }
-        
-        // Kiểm tra xem khách đã nhập tên cho các Keychain hiện ra chưa
-        for(let i=1; i<=selectedQty; i++) {
-            if(!document.getElementById(`keychainName_${i}`).value.trim()) {
-                alert(`Vui lòng nhập Tên in cho Keychain #${i}`); return;
-            }
-        }
-
-        submitBtn.textContent = "Đang xử lý..."; submitBtn.disabled = true;
-
-        const formData = new FormData();
-        formData.append("Họ_Tên", nameVal);
-        let schoolVal = ""; schoolRadios.forEach(r => { if(r.checked) schoolVal = r.value==="Khác" ? schoolOtherText.value : r.value; });
-        formData.append("Trường", schoolVal);
-        formData.append("Lớp", document.getElementById('className').value);
-        formData.append("SĐT", document.getElementById('phone').value);
-        formData.append("Facebook", document.getElementById('facebook').value);
-        formData.append("Số_lượng_Keychain", selectedQty);
-        formData.append("Bill_Thanh_Toán", document.getElementById('paymentProof').files[0]);
-
-        // Xử lý tạo SVG cho từng cái Keychain đang bật
-        for(let i=1; i<=selectedQty; i++) {
-            const keyText = document.getElementById(`keychainName_${i}`).value.trim();
-            const spacing = parseFloat(document.getElementById(`spacingInput_${i}`).value);
-            
-            let path = new opentype.Path();
-            let x = 0; const y = 100;
-            for (let j = 0; j < keyText.length; j++) {
-                const charPath = opentypeFont.getPath(keyText[j], x, y, 100);
-                path.extend(charPath);
-                x += opentypeFont.getAdvanceWidth(keyText[j], 100) + spacing;
-            }
-            const bb = path.getBoundingBox();
-            const svgContent = `<?xml version="1.0" encoding="utf-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${bb.x2-bb.x1+20}" height="${bb.y2-bb.y1+20}" viewBox="${bb.x1-10} ${bb.y1-10} ${bb.x2-bb.x1+20} ${bb.y2-bb.y1+20}"><path d="${path.toPathData()}" fill="black" /></svg>`;
-            const svgFile = new File([new Blob([svgContent], { type: 'image/svg+xml' })], `Vector_KC${i}_${keyText}.svg`, { type: 'image/svg+xml' });
-
-            // Ghi dữ liệu từng cái vào Form
-            formData.append(`Keychain_${i}_Tên`, keyText);
-            formData.append(`Keychain_${i}_Độ_dày`, document.getElementById(`thicknessInput_${i}`).value + "mm");
-            formData.append(`Keychain_${i}_Khoảng_cách`, spacing + "px");
-            formData.append(`Keychain_${i}_Tọa_độ_X`, document.getElementById(`posXInput_${i}`).value);
-            formData.append(`Keychain_${i}_Tọa_độ_Y`, document.getElementById(`posYInput_${i}`).value);
-            formData.append(`File_Vector_Cắt_Keychain_${i}`, svgFile);
-        }
-
-        fetch("https://formsubmit.co/ajax/EMAIL_CUA_BAN@gmail.com", { method: "POST", body: formData })
-        .then(() => {
-            document.getElementById('formScreen').style.display = 'none';
-            document.getElementById('thankYouMsg').textContent = `Chúng mình xin cảm ơn sự ủng hộ từ ${nameVal}!`;
-            document.getElementById('successScreen').style.display = 'block';
-        }).catch(() => {
-            alert("Có lỗi xảy ra, vui lòng thử lại!");
-            submitBtn.textContent = "Gửi Đơn Hàng & Thiết Kế"; submitBtn.disabled = false;
-        });
-    });
-</script>
-
 <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { FontLoader } from 'three/addons/loaders/FontLoader.js';
     import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
-    let currentFont = null;
-    const renderersData = []; // Mảng chứa 3 khung render 3D độc lập
+    // 1. QUẢN LÝ GIAO DIỆN (UI/UX)
+    let currentQuantity = 1;
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Logic Trường học khác
+    document.getElementsByName('school').forEach(r => r.addEventListener('change', () => {
+        document.getElementById('schoolOtherText').style.display = document.getElementById('schoolOtherRadio').checked ? 'block' : 'none';
+    }));
 
-    new FontLoader().load('https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json', function (font) {
-        currentFont = font;
-        // Khởi tạo 3 môi trường 3D ngay khi tải xong font
-        init3DPreview(1);
-        init3DPreview(2);
-        init3DPreview(3);
+    // Logic Đổi Số lượng -> Hiện QR & Mở số lượng 3D Viewer
+    const qrData = {
+        "1": { text: "Vui lòng thanh toán 62.000 vào mã QR dưới đây", qr: "LINK_QR_1" },
+        "2": { text: "Vui lòng thanh toán 120.000 vào mã QR dưới đây", qr: "LINK_QR_2" },
+        "3": { text: "Vui lòng thanh toán 180.000 vào mã QR dưới đây", qr: "LINK_QR_3" }
+    };
+
+    document.getElementsByName('quantity').forEach(r => r.addEventListener('change', (e) => {
+        currentQuantity = parseInt(e.target.value);
+        document.getElementById('paymentText').textContent = qrData[currentQuantity].text;
+        document.getElementById('paymentQR').src = qrData[currentQuantity].qr;
+        
+        // Bật tắt các khối Keychain
+        document.getElementById('kcSection1').classList.toggle('active', currentQuantity >= 1);
+        document.getElementById('kcSection2').classList.toggle('active', currentQuantity >= 2);
+        document.getElementById('kcSection3').classList.toggle('active', currentQuantity >= 3);
+
+        // Kích hoạt resize cho 3D Canvas khi nó vừa hiện ra từ trạng thái ẩn (display:none -> block)
+        setTimeout(() => {
+            viewers.forEach(v => { if(v.index <= currentQuantity) v.resize(); });
+        }, 50);
+    }));
+
+    // 2. TẢI FONT CHỮ (Cả Vector 2D và 3D Model)
+    let font2D = null;
+    let font3D = null;
+    let fontsLoaded = 0;
+
+    function checkReady() {
+        fontsLoaded++;
+        if (fontsLoaded === 2) {
+            submitBtn.textContent = "Gửi Đơn Hàng & File Thiết Kế";
+            submitBtn.disabled = false;
+            viewers.forEach(v => v.updateText()); // Render text lần đầu
+        }
+    }
+
+    // Tải Font Opentype (Xuất file cắt SVG)
+    opentype.load('https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Bold.ttf', function(err, font) {
+        if (!err) { font2D = font; checkReady(); }
     });
 
-    // Hàm tạo môi trường 3D đóng gói độc lập (Isolation)
-    function init3DPreview(index) {
-        const container = document.getElementById(`canvas-container_${index}`);
-        const inputName = document.getElementById(`keychainName_${index}`);
-        const inputThickness = document.getElementById(`thicknessInput_${index}`);
-        const inputSpacing = document.getElementById(`spacingInput_${index}`);
-        const inputX = document.getElementById(`posXInput_${index}`);
-        const inputY = document.getElementById(`posYInput_${index}`);
+    // Tải Font Three.js (Hiển thị giả lập 3D)
+    new FontLoader().load('https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json', function (font) {
+        font3D = font; checkReady();
+    });
+
+    // 3. XÂY DỰNG NHÀ MÁY (FACTORY) TẠO MÔI TRƯỜNG 3D CHO TỪNG KEYCHAIN
+    const viewers = [];
+    
+    function initViewer(index) {
+        const container = document.getElementById(`kcCanvas${index}`);
+        const inputName = document.getElementById(`kcName${index}`);
+        const inputZ = document.getElementById(`kcZ${index}`);
+        const inputSpace = document.getElementById(`kcSpace${index}`);
+        const inputX = document.getElementById(`kcX${index}`);
+        const inputY = document.getElementById(`kcY${index}`);
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -334,42 +271,36 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
+        // Mô hình Cà vạt nền (Dày 4, Tọa độ Z gốc nằm ở 0)
         const baseGeo = new THREE.BoxGeometry(60, 20, 4);
         const baseMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
-        scene.add(new THREE.Mesh(baseGeo, baseMat));
+        const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+        scene.add(baseMesh);
 
-        let textGroup = null; 
+        let textGroup = null;
 
-        function updateText3D() {
-            if (!currentFont) return;
+        const updateText = () => {
+            if (!font3D) return;
             const textStr = inputName.value.toUpperCase() || ' ';
             
             if (textGroup) {
                 scene.remove(textGroup);
-                textGroup.children.forEach(child => {
-                    child.geometry.dispose();
-                    child.material.dispose();
-                });
+                textGroup.children.forEach(child => { child.geometry.dispose(); child.material.dispose(); });
             }
 
-            const thickness = parseFloat(inputThickness.value);
-            const spacing3D = parseFloat(inputSpacing.value) * 0.08; 
+            const thickness = parseFloat(inputZ.value);
+            const spacing3D = parseFloat(inputSpace.value) * 0.08; 
             
             textGroup = new THREE.Group();
             const textMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.7, roughness: 0.2 });
             
-            let currentX = 0;
-            const size = 8;
-
+            let currentX = 0; const size = 8;
             for (let i = 0; i < textStr.length; i++) {
                 const char = textStr[i];
-                if (char === ' ') {
-                    currentX += size * 0.4 + spacing3D;
-                    continue;
-                }
-                const charGeo = new TextGeometry(char, {
-                    font: currentFont, size: size, height: thickness, curveSegments: 4, bevelEnabled: false 
-                });
+                if (char === ' ') { currentX += size * 0.4 + spacing3D; continue; }
+
+                // LỆNH EXTRUDE ĐÃ CHUẨN XÁC: height = thickness, không vát góc.
+                const charGeo = new TextGeometry(char, { font: font3D, size: size, height: thickness, curveSegments: 4, bevelEnabled: false });
                 charGeo.computeBoundingBox();
                 const charWidth = charGeo.boundingBox.max.x - charGeo.boundingBox.min.x;
                 
@@ -379,54 +310,113 @@
                 currentX += charWidth + spacing3D;
             }
 
-            const totalWidth = currentX - spacing3D; 
-            const centerOffset = -0.5 * totalWidth;
+            const centerOffset = -0.5 * (currentX - spacing3D);
             const posX = parseFloat(inputX.value);
             const posY = parseFloat(inputY.value);
             
+            // Ép dính mặt lưng chữ xuống bề mặt hộp (Z = 2)
             textGroup.position.set(centerOffset + posX, posY, 2); 
             scene.add(textGroup);
-        }
+        };
 
-        // Gắn sự kiện lắng nghe riêng biệt cho từng khối
-        inputName.addEventListener('input', updateText3D);
-        
-        inputThickness.addEventListener('input', () => {
-            document.getElementById(`valZ_${index}`).textContent = inputThickness.value;
-            updateText3D();
-        });
+        // Gắn sự kiện (Event Listeners) để cập nhật theo thời gian thực
+        inputName.addEventListener('input', updateText);
+        inputZ.addEventListener('input', () => { document.getElementById(`valZ${index}`).textContent = inputZ.value; updateText(); });
+        inputSpace.addEventListener('input', () => { document.getElementById(`valSpace${index}`).textContent = inputSpace.value; updateText(); });
+        inputX.addEventListener('input', () => { document.getElementById(`valX${index}`).textContent = inputX.value; updateText(); });
+        inputY.addEventListener('input', () => { document.getElementById(`valY${index}`).textContent = inputY.value; if(textGroup) textGroup.position.y = parseFloat(inputY.value); });
 
-        inputSpacing.addEventListener('input', () => {
-            document.getElementById(`valSpace_${index}`).textContent = inputSpacing.value;
-            updateText3D();
-        });
+        const resize = () => {
+            if(container.clientWidth === 0) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        };
 
-        inputX.addEventListener('input', () => {
-            document.getElementById(`valX_${index}`).textContent = inputX.value;
-            updateText3D();
-        });
-
-        inputY.addEventListener('input', () => {
-            document.getElementById(`valY_${index}`).textContent = inputY.value;
-            if(textGroup) textGroup.position.y = parseFloat(inputY.value);
-        });
-
-        // Đẩy vào mảng quản lý render
-        renderersData.push({ renderer, scene, camera, controls, container });
+        return { index, scene, camera, renderer, controls, updateText, resize };
     }
 
-    // Vòng lặp Render chung cho cả 3 cảnh (Chỉ render những cảnh đang hiển thị trên màn hình để tối ưu RAM)
+    // Khởi tạo cả 3 khung 3D ngầm trong bộ nhớ
+    viewers.push(initViewer(1));
+    viewers.push(initViewer(2));
+    viewers.push(initViewer(3));
+
+    // Vòng lặp Render (Chỉ vẽ những ô nào đang hiển thị để tiết kiệm RAM điện thoại)
     function animate() {
         requestAnimationFrame(animate);
-        renderersData.forEach(r => {
-            // Kiểm tra xem thẻ div cha có đang được CSS hiển thị không (display != none)
-            if (r.container.offsetParent !== null) {
-                r.controls.update();
-                r.renderer.render(r.scene, r.camera);
+        viewers.forEach(v => {
+            if (v.index <= currentQuantity) {
+                v.controls.update();
+                v.renderer.render(v.scene, v.camera);
             }
         });
     }
     animate();
+
+    // 4. HỆ THỐNG XỬ LÝ GỬI EMAIL VÀ XUẤT FILE VECTOR TỰ ĐỘNG
+    submitBtn.addEventListener('click', () => {
+        const nameVal = document.getElementById('fullName').value.trim();
+        if (!nameVal) { alert('Vui lòng điền Họ Tên!'); return; }
+        if (!document.getElementById('paymentProof').files[0]) { alert("Vui lòng tải lên ảnh bill chuyển khoản!"); return; }
+
+        // Kiểm tra xem khách đã nhập chữ cho các keychain được chọn chưa
+        for(let i=1; i<=currentQuantity; i++) {
+            if(!document.getElementById(`kcName${i}`).value.trim()) {
+                alert(`Vui lòng nhập Tên in cho Keychain #${i}`); return;
+            }
+        }
+
+        submitBtn.textContent = "Hệ thống đang xử lý thiết kế..."; submitBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append("Họ_Tên", nameVal);
+        let schoolVal = ""; document.getElementsByName('school').forEach(r => { if(r.checked) schoolVal = r.value==="Khác" ? document.getElementById('schoolOtherText').value : r.value; });
+        formData.append("Trường", schoolVal);
+        formData.append("Lớp", document.getElementById('className').value);
+        formData.append("SĐT", document.getElementById('phone').value);
+        formData.append("Facebook", document.getElementById('facebook').value);
+        formData.append("Số_lượng_đặt", currentQuantity);
+        formData.append("Bill_Thanh_Toán", document.getElementById('paymentProof').files[0]);
+
+        // Vòng lặp vắt file Vector cho TỪNG chiếc Keychain đang bật
+        for(let i=1; i<=currentQuantity; i++) {
+            const keyText = document.getElementById(`kcName${i}`).value.trim();
+            const spacing = parseFloat(document.getElementById(`kcSpace${i}`).value);
+            
+            // Xây dựng bản vẽ Vector
+            let path = new opentype.Path();
+            let x = 0; const y = 100;
+            for (let j = 0; j < keyText.length; j++) {
+                if(keyText[j] !== ' ') {
+                    const charPath = font2D.getPath(keyText[j], x, y, 100);
+                    path.extend(charPath);
+                }
+                x += font2D.getAdvanceWidth(keyText[j], 100) + spacing;
+            }
+            
+            const bb = path.getBoundingBox();
+            const svgContent = `<?xml version="1.0" encoding="utf-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${bb.x2-bb.x1+20}" height="${bb.y2-bb.y1+20}" viewBox="${bb.x1-10} ${bb.y1-10} ${bb.x2-bb.x1+20} ${bb.y2-bb.y1+20}"><path d="${path.toPathData()}" fill="black" /></svg>`;
+            const svgFile = new File([new Blob([svgContent], { type: 'image/svg+xml' })], `Keychain_${i}_${keyText}.svg`, { type: 'image/svg+xml' });
+
+            // Gắn thông số độc lập của chiếc này vào form
+            formData.append(`Keychain_${i}_Tên`, keyText);
+            formData.append(`Keychain_${i}_TọaĐộ_X`, document.getElementById(`kcX${i}`).value);
+            formData.append(`Keychain_${i}_TọaĐộ_Y`, document.getElementById(`kcY${i}`).value);
+            formData.append(`Keychain_${i}_ĐộDày`, document.getElementById(`kcZ${i}`).value + "mm");
+            formData.append(`Keychain_${i}_FileVector`, svgFile);
+        }
+
+        // THAY EMAIL CỦA BẠN VÀO ĐÂY
+        fetch("https://formsubmit.co/ajax/EMAIL_CUA_BAN@gmail.com", { method: "POST", body: formData })
+        .then(() => {
+            document.getElementById('formScreen').style.display = 'none';
+            document.getElementById('thankYouMsg').textContent = `Chúng mình xin cảm ơn sự ủng hộ từ ${nameVal}!`;
+            document.getElementById('successScreen').style.display = 'block';
+        }).catch(() => {
+            alert("Có lỗi xảy ra, vui lòng thử lại!");
+            submitBtn.textContent = "Gửi Đơn Hàng & Thiết Kế"; submitBtn.disabled = false;
+        });
+    });
 </script>
 
 </body>
